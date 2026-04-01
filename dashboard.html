@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVI - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff4d4d">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>CRM System</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="index.html">Students</a></li>
+                    <li><a href="tasks.html">Tasks</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="header-left">
+                    <button id="burgerBtn" class="burger-btn">☰</button>
+                    <div class="search-bar">
+                        <input type="text" id="globalSearch" placeholder="Search students...">
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="chat.html" class="icon-btn bell-btn" title="Chat">
+                        <img src="icons/bell_icon.png" alt="Notifications" class="bell-img">
+                    </a>
+                    <div class="profile-container">
+                        <div class="avatar avatar-md">
+                            <img src="icons/avatar_icon.png" alt="Profile">
+                        </div>
+                        <span class="profile-name">James Bond</span>
+                        <div class="profile-dropdown">
+                            <a href="#" class="dropdown-item">Profile</a>
+                            <a href="#" class="dropdown-item">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content-header">
+                <h1>Dashboard</h1>
+            </section>
+
+            <div class="empty-state">
+                <p>Welcome to the Dashboard. This page is currently empty.</p>
+            </div>
+        </main>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

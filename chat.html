@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PVI - Chat Room</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff4d4d">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>CRM System</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="index.html">Students</a></li>
+                    <li><a href="tasks.html">Tasks</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content chat-main">
+            <header>
+                <div class="header-left">
+                    <button id="burgerBtn" class="burger-btn">☰</button>
+                    <div class="search-bar">
+                        <input type="text" id="globalSearch" placeholder="Search students...">
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="chat.html" class="icon-btn bell-btn active" title="Chat">
+                        <img src="icons/bell_icon.png" alt="Notifications" class="bell-img">
+                    </a>
+                    <div class="profile-container">
+                        <div class="avatar avatar-md">
+                            <img src="icons/avatar_icon.png" alt="Profile">
+                        </div>
+                        <span class="profile-name">James Bond</span>
+                        <div class="profile-dropdown">
+                            <a href="#" class="dropdown-item">Profile</a>
+                            <a href="#" class="dropdown-item">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="chat-container">
+                <!-- Chat Sidebar (Contacts) -->
+                <div class="chat-sidebar">
+                    <div class="chat-sidebar-header">
+                        <h3>Messages</h3>
+                    </div>
+                    <div class="contact-list" id="contactList">
+                        <!-- Contacts will be injected or managed via JS -->
+                        <div class="contact-item active" data-contact="vm">
+                            <div class="avatar avatar-sm">VM</div>
+                            <div class="contact-info">
+                                <p class="contact-name">Valentyn Miedientsov</p>
+                                <p class="contact-last-msg">Are we meeting for the lab?</p>
+                            </div>
+                            <span class="contact-time">12:45</span>
+                        </div>
+                        <div class="contact-item" data-contact="jd">
+                            <div class="avatar avatar-sm">JD</div>
+                            <div class="contact-info">
+                                <p class="contact-name">John Doe</p>
+                                <p class="contact-last-msg">I've sent the file.</p>
+                            </div>
+                            <span class="contact-time">10:30</span>
+                        </div>
+                        <div class="contact-item" data-contact="as">
+                            <div class="avatar avatar-sm">AS</div>
+                            <div class="contact-info">
+                                <p class="contact-name">Anna Smith</p>
+                                <p class="contact-last-msg">Thanks for help!</p>
+                            </div>
+                            <span class="contact-time">Yesterday</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Window -->
+                <div class="chat-window" id="chatWindow">
+                    <div class="chat-header">
+                        <div class="avatar avatar-sm" id="activeChatAvatar">VM</div>
+                        <div class="chat-contact-details">
+                            <h4 id="activeChatName">Valentyn Miedientsov</h4>
+                            <span class="status-text">Online</span>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Messages will be injected here -->
+                    </div>
+                    <div class="chat-footer">
+                        <input type="text" placeholder="Type a message...">
+                        <button class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
