@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PVI - User Management</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/style.css?v=3">
     <meta name="theme-color" content="#ff4d4d">
 </head>
 <body>
@@ -93,7 +92,8 @@
             <div class="modal-body">
                 <form id="userForm">
                     <input type="hidden" id="studentId" name="id">
-                    <input type="hidden" id="editIndex">
+                    <input type="hidden" id="editStudentId" name="editStudentId">
+                    <p id="formError" class="form-error" role="alert"></p>
                     <div class="form-row">
                         <label for="group">Group</label>
                         <div class="input-wrapper">
@@ -169,6 +169,6 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/script.js"></script>
+    <script src="js/script.js?v=3"></script>
 </body>
 </html>

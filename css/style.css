@@ -565,6 +565,17 @@ th {
     display: block;
 }
 
+.form-error {
+    display: none;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    border: 1px solid #f2b8b5;
+    background: #fff1f1;
+    color: #b42318;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
 .form-row {
     display: flex;
     align-items: center;
