@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
+define('APP_BOOTSTRAP', true);
+require __DIR__ . '/config.php';
 $dataFile = dirname(__DIR__) . '/data/students.json';
 
 function sendJson(array $payload, int $statusCode = 200): void
@@ -51,7 +53,7 @@ function normalizeStudentInput(array $input): array
     ];
 }
 
-function validateStudent(array $student): ?array
+function validateStudent(array $student, array $config): ?array
 {
     $requiredFields = ['group', 'firstName', 'lastName', 'gender', 'birthday', 'status'];
     foreach ($requiredFields as $field) {
@@ -60,13 +62,11 @@ function validateStudent(array $student): ?array
         }
     }
 
-    $allowedGroups = ['PZ-21', 'PZ-22', 'PZ-23'];
-    if (!in_array($student['group'], $allowedGroups, true)) {
+    if (!array_key_exists($student['group'], $config['groups'])) {
         return ['code' => 101, 'message' => 'Invalid group value'];
     }
 
-    $allowedGenders = ['male', 'female'];
-    if (!in_array($student['gender'], $allowedGenders, true)) {
+    if (!array_key_exists($student['gender'], $config['genders'])) {
         return ['code' => 102, 'message' => 'Invalid gender value'];
     }
 
@@ -116,7 +116,7 @@ $action = (string) ($_POST['action'] ?? '');
 
 if ($action === 'create') {
     $student = normalizeStudentInput($_POST);
-    $validationError = validateStudent($student);
+    $validationError = validateStudent($student, $config);
 
     if ($validationError !== null) {
         sendJson(['status' => false, 'error' => $validationError], 422);
@@ -159,7 +159,7 @@ if ($action === 'update') {
     }
 
     $student = normalizeStudentInput($_POST);
-    $validationError = validateStudent($student);
+    $validationError = validateStudent($student, $config);
 
     if ($validationError !== null) {
         sendJson(['status' => false, 'error' => $validationError], 422);

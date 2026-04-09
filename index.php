@@ -1,10 +1,17 @@
+<?php
+declare(strict_types=1);
+
+define('APP_BOOTSTRAP', true);
+require __DIR__ . '/api/config.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PVI - User Management</title>
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff4d4d">
 </head>
 <body>
@@ -17,7 +24,7 @@
             <nav>
                 <ul>
                     <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="index.html" class="active">Students</a></li>
+                    <li><a href="index.php" class="active">Students</a></li>
                     <li><a href="tasks.html">Tasks</a></li>
                 </ul>
             </nav>
@@ -51,10 +58,7 @@
 
             <section class="content-header">
                 <h1>Students</h1>
-                <div class="content-actions">
-                    <button id="deleteSelectedBtn" class="btn btn-delete-selected" type="button" disabled>Delete selected</button>
-                    <button id="addUserBtn" class="btn-add-square" type="button">+</button>
-                </div>
+                <button id="addUserBtn" class="btn-add-square">+</button>
             </section>
 
             <section class="table-container">
@@ -62,9 +66,6 @@
                     <table id="userTable">
                         <thead>
                             <tr>
-                                <th class="checkbox-column">
-                                    <input type="checkbox" id="selectAllStudents" aria-label="Select all students">
-                                </th>
                                 <th>Group</th>
                                 <th>Name</th>
                                 <th>Gender</th>
@@ -74,7 +75,7 @@
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
-                            <!-- Mock users will be injected here -->
+                            <!-- Students injected by JS -->
                         </tbody>
                     </table>
                 </div>
@@ -92,16 +93,15 @@
             <div class="modal-body">
                 <form id="userForm">
                     <input type="hidden" id="studentId" name="id">
-                    <input type="hidden" id="editStudentId" name="editStudentId">
-                    <p id="formError" class="form-error" role="alert"></p>
+                    <input type="hidden" id="editStudentId">
                     <div class="form-row">
                         <label for="group">Group</label>
                         <div class="input-wrapper">
                             <select id="group" name="group" required>
                                 <option value="" disabled selected>Select Group</option>
-                                <option value="PZ-21">PZ-21</option>
-                                <option value="PZ-22">PZ-22</option>
-                                <option value="PZ-23">PZ-23</option>
+                                <?php foreach ($config['groups'] as $id => $name): ?>
+                                    <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($name) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
@@ -122,8 +122,9 @@
                         <div class="input-wrapper">
                             <select id="gender" name="gender" required>
                                 <option value="" disabled selected>Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
+                                <?php foreach ($config['genders'] as $id => $name): ?>
+                                    <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($name) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
@@ -169,6 +170,6 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/script.js?v=3"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
