@@ -6,7 +6,6 @@ header('Content-Type: application/json; charset=utf-8');
 
 define('APP_BOOTSTRAP', true);
 require __DIR__ . '/config.php';
-$dataFile = dirname(__DIR__) . '/data/students.json';
 
 function sendJson(array $payload, int $statusCode = 200): void
 {
@@ -15,100 +14,104 @@ function sendJson(array $payload, int $statusCode = 200): void
     exit;
 }
 
-function readStudents(string $dataFile): array
-{
-    if (!file_exists($dataFile)) {
-        return [];
-    }
-
-    $contents = file_get_contents($dataFile);
-    if ($contents === false || $contents === '') {
-        return [];
-    }
-
-    $students = json_decode($contents, true);
-    return is_array($students) ? $students : [];
-}
-
-function writeStudents(string $dataFile, array $students): bool
-{
-    $directory = dirname($dataFile);
-    if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
-        return false;
-    }
-
-    $encoded = json_encode(array_values($students), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    return $encoded !== false && file_put_contents($dataFile, $encoded, LOCK_EX) !== false;
-}
-
-function normalizeStudentInput(array $input): array
-{
-    return [
-        'group' => trim((string) ($input['group'] ?? '')),
-        'firstName' => trim((string) ($input['firstName'] ?? '')),
-        'lastName' => trim((string) ($input['lastName'] ?? '')),
-        'gender' => trim((string) ($input['gender'] ?? '')),
-        'birthday' => trim((string) ($input['birthday'] ?? '')),
-        'status' => trim((string) ($input['status'] ?? '')),
-    ];
-}
-
-function validateStudent(array $student, array $config): ?array
+function validateStudent(array $student, array $groups, array $genders): ?array
 {
     $requiredFields = ['group', 'firstName', 'lastName', 'gender', 'birthday', 'status'];
     foreach ($requiredFields as $field) {
-        if ($student[$field] === '') {
+        if (!array_key_exists($field, $student) || $student[$field] === '' || $student[$field] === null) {
             return ['code' => 100, 'message' => "Field '{$field}' is required"];
         }
     }
 
-    if (!array_key_exists($student['group'], $config['groups'])) {
+    if (!array_key_exists($student['group'], $groups)) {
         return ['code' => 101, 'message' => 'Invalid group value'];
     }
 
-    if (!array_key_exists($student['gender'], $config['genders'])) {
+    if (!is_bool($student['gender'])) {
         return ['code' => 102, 'message' => 'Invalid gender value'];
     }
 
-    $allowedStatuses = ['active', 'inactive'];
-    if (!in_array($student['status'], $allowedStatuses, true)) {
+    if (!is_bool($student['status'])) {
         return ['code' => 103, 'message' => 'Invalid status value'];
     }
 
     $date = DateTime::createFromFormat('Y-m-d', $student['birthday']);
-    $isValidBirthday = $date && $date->format('Y-m-d') === $student['birthday'];
-    if (!$isValidBirthday) {
+    if (!$date || $date->format('Y-m-d') !== $student['birthday']) {
         return ['code' => 104, 'message' => 'Invalid birthday format'];
     }
 
     return null;
 }
 
-function nextStudentId(array $students): int
+function normalizeBooleanValue(mixed $value): ?bool
 {
-    $maxId = 0;
-    foreach ($students as $student) {
-        $maxId = max($maxId, (int) ($student['id'] ?? 0));
+    if (is_bool($value)) {
+        return $value;
     }
 
-    return $maxId + 1;
+    $normalized = strtolower(trim((string) $value));
+
+    if (in_array($normalized, ['1', 'true'], true)) {
+        return true;
+    }
+
+    if (in_array($normalized, ['0', 'false'], true)) {
+        return false;
+    }
+
+    return null;
+}
+
+function normalizeStudentInput(array $input): array
+{
+    return [
+        'group'     => trim((string) ($input['group']     ?? '')),
+        'firstName' => trim((string) ($input['firstName'] ?? '')),
+        'lastName'  => trim((string) ($input['lastName']  ?? '')),
+        'gender'    => normalizeBooleanValue($input['gender'] ?? null),
+        'birthday'  => trim((string) ($input['birthday']  ?? '')),
+        'status'    => normalizeBooleanValue($input['status'] ?? null),
+    ];
+}
+
+function rowToStudent(array $row): array
+{
+    return [
+        'id'        => (int) $row['id'],
+        'group'     => $row['group'],
+        'firstName' => $row['firstName'],
+        'lastName'  => $row['lastName'],
+        'gender'    => (bool) $row['gender'],
+        'birthday'  => $row['birthday'],
+        'status'    => (bool) $row['status'],
+    ];
 }
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$students = readStudents($dataFile);
+
+try {
+    $db = getDb();
+} catch (PDOException $e) {
+    sendJson([
+        'status' => false,
+        'error'  => ['code' => 500, 'message' => 'Database connection failed: ' . $e->getMessage()],
+    ], 500);
+}
 
 if ($method === 'GET') {
+    $stmt = $db->query('SELECT * FROM students ORDER BY id');
+    $rows = $stmt->fetchAll();
     sendJson([
         'status' => true,
-        'error' => null,
-        'users' => array_values($students),
+        'error'  => null,
+        'users'  => array_map('rowToStudent', $rows),
     ]);
 }
 
 if ($method !== 'POST') {
     sendJson([
         'status' => false,
-        'error' => ['code' => 105, 'message' => 'Method not allowed'],
+        'error'  => ['code' => 105, 'message' => 'Method not allowed'],
     ], 405);
 }
 
@@ -116,69 +119,77 @@ $action = (string) ($_POST['action'] ?? '');
 
 if ($action === 'create') {
     $student = normalizeStudentInput($_POST);
-    $validationError = validateStudent($student, $config);
+    $error   = validateStudent($student, $groups, $genders);
 
-    if ($validationError !== null) {
-        sendJson(['status' => false, 'error' => $validationError], 422);
+    if ($error !== null) {
+        sendJson(['status' => false, 'error' => $error], 422);
     }
 
-    $student['id'] = nextStudentId($students);
-    $students[] = $student;
+    $stmt = $db->prepare(
+        'INSERT INTO students (`group`, firstName, lastName, gender, birthday, status)
+         VALUES (:group, :firstName, :lastName, :gender, :birthday, :status)'
+    );
+    $stmt->execute([
+        ':group'     => $student['group'],
+        ':firstName' => $student['firstName'],
+        ':lastName'  => $student['lastName'],
+        ':gender'    => (int) $student['gender'],
+        ':birthday'  => $student['birthday'],
+        ':status'    => (int) $student['status'],
+    ]);
 
-    if (!writeStudents($dataFile, $students)) {
-        sendJson([
-            'status' => false,
-            'error' => ['code' => 106, 'message' => 'Failed to save student'],
-        ], 500);
-    }
+    $newId           = (int) $db->lastInsertId();
+    $student['id']   = $newId;
 
     sendJson([
         'status' => true,
-        'error' => null,
-        'id' => $student['id'],
-        'user' => $student,
+        'error'  => null,
+        'id'     => $newId,
+        'user'   => $student,
     ]);
 }
 
 if ($action === 'update') {
     $studentId = (int) ($_POST['id'] ?? 0);
-    $studentIndex = null;
 
-    foreach ($students as $index => $student) {
-        if ((int) ($student['id'] ?? 0) === $studentId) {
-            $studentIndex = $index;
-            break;
-        }
-    }
-
-    if ($studentIndex === null) {
+    $check = $db->prepare('SELECT id FROM students WHERE id = :id');
+    $check->execute([':id' => $studentId]);
+    if (!$check->fetch()) {
         sendJson([
             'status' => false,
-            'error' => ['code' => 107, 'message' => 'Not found student'],
+            'error'  => ['code' => 107, 'message' => 'Not found student'],
         ], 404);
     }
 
     $student = normalizeStudentInput($_POST);
-    $validationError = validateStudent($student, $config);
+    $error   = validateStudent($student, $groups, $genders);
 
-    if ($validationError !== null) {
-        sendJson(['status' => false, 'error' => $validationError], 422);
+    if ($error !== null) {
+        sendJson(['status' => false, 'error' => $error], 422);
     }
+
+    $stmt = $db->prepare(
+        'UPDATE students
+         SET `group` = :group, firstName = :firstName, lastName = :lastName,
+             gender = :gender, birthday = :birthday, status = :status
+         WHERE id = :id'
+    );
+    $stmt->execute([
+        ':group'     => $student['group'],
+        ':firstName' => $student['firstName'],
+        ':lastName'  => $student['lastName'],
+        ':gender'    => (int) $student['gender'],
+        ':birthday'  => $student['birthday'],
+        ':status'    => (int) $student['status'],
+        ':id'        => $studentId,
+    ]);
 
     $student['id'] = $studentId;
-    $students[$studentIndex] = $student;
-
-    if (!writeStudents($dataFile, $students)) {
-        sendJson([
-            'status' => false,
-            'error' => ['code' => 108, 'message' => 'Failed to update student'],
-        ], 500);
-    }
 
     sendJson([
         'status' => true,
-        'error' => null,
-        'user' => $student,
+        'error'  => null,
+        'user'   => $student,
     ]);
 }
 
@@ -187,38 +198,33 @@ if ($action === 'delete') {
     if (!is_array($ids) || $ids === []) {
         sendJson([
             'status' => false,
-            'error' => ['code' => 109, 'message' => 'No students selected for deletion'],
+            'error'  => ['code' => 109, 'message' => 'No students selected for deletion'],
         ], 422);
     }
 
-    $idsToDelete = array_map('intval', $ids);
-    $filteredStudents = array_values(array_filter(
-        $students,
-        static fn(array $student): bool => !in_array((int) ($student['id'] ?? 0), $idsToDelete, true)
-    ));
+    $idsToDelete  = array_map('intval', $ids);
+    $placeholders = implode(',', array_fill(0, count($idsToDelete), '?'));
 
-    if (count($filteredStudents) === count($students)) {
+    $check = $db->prepare("SELECT COUNT(*) FROM students WHERE id IN ({$placeholders})");
+    $check->execute($idsToDelete);
+    if ((int) $check->fetchColumn() === 0) {
         sendJson([
             'status' => false,
-            'error' => ['code' => 110, 'message' => 'Not found student'],
+            'error'  => ['code' => 110, 'message' => 'Not found student'],
         ], 404);
     }
 
-    if (!writeStudents($dataFile, $filteredStudents)) {
-        sendJson([
-            'status' => false,
-            'error' => ['code' => 111, 'message' => 'Failed to delete students'],
-        ], 500);
-    }
+    $stmt = $db->prepare("DELETE FROM students WHERE id IN ({$placeholders})");
+    $stmt->execute($idsToDelete);
 
     sendJson([
-        'status' => true,
-        'error' => null,
+        'status'     => true,
+        'error'      => null,
         'deletedIds' => $idsToDelete,
     ]);
 }
 
 sendJson([
     'status' => false,
-    'error' => ['code' => 112, 'message' => 'Unknown action'],
+    'error'  => ['code' => 112, 'message' => 'Unknown action'],
 ], 400);

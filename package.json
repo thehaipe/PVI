@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "chat": "node chat-server.js",
+    "test": "node tests/chatServerLogic.test.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {}
+}

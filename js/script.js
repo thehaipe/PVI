@@ -1,6 +1,10 @@
 let students = [];
 const STUDENTS_API_URL = 'api/students.php';
 
+function booleanToFormValue(value) {
+    return value === true || value === 1 || value === '1' || value === 'true' ? '1' : '0';
+}
+
 if ('serviceWorker' in navigator) {
     $(window).on('load', function() {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -41,7 +45,7 @@ class StudentFormManager {
         this.$userForm[0].reset();
         this.$editStudentId.val('');
         this.$studentId.val('');
-        $('#status').val('inactive');
+        $('#status').val('0');
         this.clearFormError();
         this.$userModal.show();
     }
@@ -56,9 +60,9 @@ class StudentFormManager {
         $('#group').val(student.group);
         $('#firstName').val(student.firstName);
         $('#lastName').val(student.lastName);
-        $('#gender').val(student.gender);
+        $('#gender').val(booleanToFormValue(student.gender));
         $('#birthday').val(student.birthday);
-        $('#status').val(student.status || 'active');
+        $('#status').val(booleanToFormValue(student.status));
         this.clearFormError();
         this.$userModal.show();
     }
@@ -286,7 +290,8 @@ class StudentManager {
 
         data.forEach((student) => {
             const studentId = String(student.id);
-            const statusClass = student.status === 'active' ? 'status-active' : 'status-inactive';
+            const statusClass = student.status ? 'status-active' : 'status-inactive';
+            const genderKey = booleanToFormValue(student.gender);
             const isChecked = this.selectedStudentIds.has(studentId) ? 'checked' : '';
             const rowClass = this.selectedStudentIds.has(studentId) ? 'selected-row' : '';
             const isDeleteDisabled = this.selectedStudentIds.has(studentId) ? '' : 'disabled';
@@ -302,9 +307,9 @@ class StudentManager {
                             aria-label="Select ${student.firstName} ${student.lastName}"
                         >
                     </td>
-                    <td>${student.group}</td>
+                    <td>${CONFIG.groups[student.group] ?? student.group}</td>
                     <td>${student.firstName} ${student.lastName}</td>
-                    <td>${student.gender}</td>
+                    <td>${CONFIG.genders[genderKey] ?? genderKey}</td>
                     <td>${student.birthday}</td>
                     <td><span class="status-indicator ${statusClass}"></span></td>
                     <td>
@@ -428,46 +433,4 @@ class StudentManager {
 
 $(document).ready(function() {
     new StudentManager().init();
-});
-
-// Mock Data for Chats (keeping it for chat.html)
-const chatData = {
-    'vm': { name: 'Valentyn Miedientsov', initials: 'VM', status: 'Online', messages: [
-        { type: 'incoming', text: 'Hello! How is the project going?', time: '12:40' },
-        { type: 'outgoing', text: "Hi Valentyn! I'm finishing the user management table right now.", time: '12:42' }
-    ]},
-    'jd': { name: 'John Doe', initials: 'JD', status: 'Last seen 10 mins ago', messages: [
-        { type: 'incoming', text: "Hey, have you seen the new requirements?", time: '10:15' }
-    ]},
-    'as': { name: 'Anna Smith', initials: 'AS', status: 'Online', messages: [
-        { type: 'incoming', text: "Thanks for the help with the lab!", time: 'Yesterday' }
-    ]}
-};
-
-// Chat logic using jQuery
-$(function() {
-    $('.contact-item').on('click', function() {
-        const contactId = $(this).data('contact');
-        const data = chatData[contactId];
-        if (!data) return;
-
-        $('.contact-item').removeClass('active');
-        $(this).addClass('active');
-
-        $('#activeChatName').text(data.name);
-        $('#activeChatAvatar').text(data.initials);
-        $('.status-text').text(data.status);
-
-        const $chatMessages = $('#chatMessages');
-        $chatMessages.empty();
-        data.messages.forEach(msg => {
-            $chatMessages.append(`
-                <div class="message ${msg.type}">
-                    <div class="message-bubble">${msg.text}</div>
-                    <span class="message-time">${msg.time}</span>
-                </div>
-            `);
-        });
-        $chatMessages.scrollTop($chatMessages[0].scrollHeight);
-    });
 });

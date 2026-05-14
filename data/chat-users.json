@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "name": "James Bond",
+    "initials": "JB",
+    "online": true
+  },
+  {
+    "id": "2",
+    "name": "Valentyn Miedientsov",
+    "initials": "VM",
+    "online": true
+  },
+  {
+    "id": "3",
+    "name": "John Doe",
+    "initials": "JD",
+    "online": false
+  },
+  {
+    "id": "4",
+    "name": "Anna Smith",
+    "initials": "AS",
+    "online": true
+  }
+]

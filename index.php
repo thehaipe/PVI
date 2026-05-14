@@ -40,7 +40,7 @@ require __DIR__ . '/api/config.php';
                     </div>
                 </div>
                 <div class="header-actions">
-                    <a href="chat.html" class="icon-btn bell-btn" title="Chat">
+                    <a href="chat.php" class="icon-btn bell-btn" title="Chat">
                         <img src="icons/bell_icon.png" alt="Notifications" class="bell-img">
                     </a>
                     <div class="profile-container">
@@ -58,7 +58,10 @@ require __DIR__ . '/api/config.php';
 
             <section class="content-header">
                 <h1>Students</h1>
-                <button id="addUserBtn" class="btn-add-square">+</button>
+                <div class="content-actions">
+                    <button id="deleteSelectedBtn" class="btn btn-delete-selected" type="button" disabled>Delete selected</button>
+                    <button id="addUserBtn" class="btn-add-square" type="button">+</button>
+                </div>
             </section>
 
             <section class="table-container">
@@ -66,6 +69,9 @@ require __DIR__ . '/api/config.php';
                     <table id="userTable">
                         <thead>
                             <tr>
+                                <th class="checkbox-column">
+                                    <input type="checkbox" id="selectAllStudents" aria-label="Select all students">
+                                </th>
                                 <th>Group</th>
                                 <th>Name</th>
                                 <th>Gender</th>
@@ -99,8 +105,8 @@ require __DIR__ . '/api/config.php';
                         <div class="input-wrapper">
                             <select id="group" name="group" required>
                                 <option value="" disabled selected>Select Group</option>
-                                <?php foreach ($config['groups'] as $id => $name): ?>
-                                    <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($name) ?></option>
+                                <?php foreach ($groups as $id => $name): ?>
+                                    <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -122,8 +128,8 @@ require __DIR__ . '/api/config.php';
                         <div class="input-wrapper">
                             <select id="gender" name="gender" required>
                                 <option value="" disabled selected>Select Gender</option>
-                                <?php foreach ($config['genders'] as $id => $name): ?>
-                                    <option value="<?= htmlspecialchars($id) ?>"><?= htmlspecialchars($name) ?></option>
+                                <?php foreach ($genders as $id => $name): ?>
+                                    <option value="<?= $id ?>"><?= htmlspecialchars($name) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -138,8 +144,8 @@ require __DIR__ . '/api/config.php';
                         <label for="status">Status</label>
                         <div class="input-wrapper">
                             <select id="status" name="status" required>
-                                <option value="active">Active</option>
-                                <option value="inactive" selected>Inactive</option>
+                                <option value="1">Active</option>
+                                <option value="0" selected>Inactive</option>
                             </select>
                         </div>
                     </div>
@@ -169,6 +175,9 @@ require __DIR__ . '/api/config.php';
         </div>
     </div>
 
+    <script>
+        const CONFIG = <?= json_encode(['groups' => $groups, 'genders' => $genders], JSON_UNESCAPED_UNICODE) ?>;
+    </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="js/script.js"></script>
 </body>

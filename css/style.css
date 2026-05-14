@@ -187,6 +187,7 @@ header {
 
 .avatar-md { width: 40px; height: 40px; font-size: 14px; }
 .avatar-sm { width: 36px; height: 38px; font-size: 12px; }
+.avatar-xs { width: 24px; height: 24px; font-size: 10px; }
 
 /* Profile Dropdown */
 .profile-container {
@@ -259,11 +260,29 @@ header {
 .chat-sidebar-header {
     padding: 20px 25px;
     border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .chat-sidebar-header h3 {
     font-size: 1.2rem;
     font-weight: 700;
+}
+
+.new-room-button {
+    border: none;
+    background: transparent;
+    color: #111;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.new-room-button:hover {
+    color: var(--primary-color);
 }
 
 .contact-list {
@@ -275,13 +294,14 @@ header {
     padding: 15px 20px;
     display: flex;
     gap: 12px;
+    align-items: center;
     cursor: pointer;
     transition: background 0.2s;
     border-bottom: 1px solid #f9f9f9;
 }
 
 .contact-item:hover { background-color: #f8f9fa; }
-.contact-item.active { background-color: var(--primary-light); }
+.contact-item.active { background-color: #d8d4ef; }
 
 .contact-info {
     flex: 1;
@@ -314,6 +334,25 @@ header {
     text-overflow: ellipsis;
 }
 
+.unread-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    display: none;
+    flex-shrink: 0;
+}
+
+.contact-item.has-unread .unread-indicator {
+    display: block;
+}
+
+.contact-item.has-unread .contact-name,
+.contact-item.has-unread .contact-last-msg {
+    color: #111827;
+    font-weight: 700;
+}
+
 .chat-window {
     flex: 1;
     display: flex;
@@ -327,6 +366,115 @@ header {
     display: flex;
     align-items: center;
     gap: 15px;
+}
+
+.room-members {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.member-avatar {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: #d8d8d8;
+    color: #555;
+    font-weight: 700;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: default;
+}
+
+.member-avatar.can-remove {
+    cursor: pointer;
+}
+
+.member-remove {
+    display: none;
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(255, 77, 77, 0.92);
+    color: #fff;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.member-avatar.can-remove:hover .member-remove {
+    display: flex;
+}
+
+.add-member-button {
+    color: #fff;
+    background: #c8c8c8;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.add-member-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: 220px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 50;
+}
+
+.add-member-menu button {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.add-member-menu button:hover {
+    background: #f8f9fa;
+}
+
+.new-room-modal-content {
+    max-width: 520px;
+}
+
+.room-user-list {
+    display: grid;
+    gap: 10px;
+}
+
+.room-user-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.room-user-option:hover {
+    background: #f8f9fa;
+}
+
+.room-user-option input {
+    width: auto;
 }
 
 .chat-contact-details h4 {
@@ -388,6 +536,12 @@ header {
 
 .outgoing .message-time { align-self: flex-end; margin-right: 4px; }
 
+.message-sender {
+    color: #777;
+    font-size: 0.75rem;
+    margin: 0 0 4px 4px;
+}
+
 .chat-footer {
     padding: 20px 25px;
     border-top: 1px solid var(--border-color);
@@ -403,6 +557,29 @@ header {
     border-radius: 25px;
     background-color: #f8f9fa;
     outline: none;
+}
+
+.send-button {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.send-button img {
+    width: 32px;
+    height: 32px;
+    display: block;
+}
+
+.send-button:hover img {
+    opacity: 0.75;
 }
 
 /* User Management Content Header */

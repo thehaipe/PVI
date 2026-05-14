@@ -1,0 +1,36 @@
+[
+  {
+    "id": "lab-5",
+    "name": "Lab 5",
+    "memberIds": [
+      "1",
+      "2",
+      "4"
+    ]
+  },
+  {
+    "id": "pvi-team",
+    "name": "PVI Team",
+    "memberIds": [
+      "1",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "id": "questions",
+    "name": "Questions",
+    "memberIds": [
+      "1",
+      "3"
+    ]
+  },
+  {
+    "id": "room-pupip",
+    "name": "Pupip",
+    "memberIds": [
+      "2",
+      "1"
+    ]
+  }
+]

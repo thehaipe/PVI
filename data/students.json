@@ -1,38 +1,38 @@
 [
     {
         "id": 5,
-        "group": "PZ-22",
+        "group": "2",
         "firstName": "Maria",
         "lastName": "Kuznetsova",
-        "gender": "female",
+        "gender": false,
         "birthday": "2001-07-05",
-        "status": "inactive"
+        "status": false
     },
     {
-        "group": "PZ-21",
+        "id": 6,
+        "group": "1",
         "firstName": "Валентин",
         "lastName": "Мєдєнцов",
-        "gender": "male",
+        "gender": true,
         "birthday": "2007-11-11",
-        "status": "inactive",
-        "id": 6
+        "status": false
     },
     {
-        "group": "PZ-23",
+        "id": 7,
+        "group": "3",
         "firstName": "Ivanka",
         "lastName": "Ivankova",
-        "gender": "female",
+        "gender": false,
         "birthday": "2007-01-22",
-        "status": "inactive",
-        "id": 7
+        "status": false
     },
     {
-        "group": "PZ-21",
-        "firstName": "Ji",
-        "lastName": "Kol",
-        "gender": "male",
-        "birthday": "2000-11-11",
-        "status": "active",
+        "group": "2",
+        "firstName": "JJ",
+        "lastName": "HHF",
+        "gender": true,
+        "birthday": "2002-01-22",
+        "status": true,
         "id": 8
     }
 ]
