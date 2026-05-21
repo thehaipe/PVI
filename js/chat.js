@@ -138,6 +138,30 @@ $(function() {
         $('#roomMembers').append($menu);
     }
 
+    function ensureRoomHistory(roomId) {
+        const conversation = getConversation(roomId);
+        if (conversation.historyLoaded) return;
+        conversation.historyLoaded = true;
+
+        socket.emit('getHistory', { roomId }, function(response) {
+            if (!response || !response.status || !Array.isArray(response.messages)) return;
+            response.messages.forEach(function(msg) {
+                if (!conversation.messages.some(m => m.id === msg.id)) {
+                    conversation.messages.unshift(msg);
+                }
+            });
+            conversation.messages.sort((a, b) => a.createdAt < b.createdAt ? -1 : 1);
+            if (response.messages.length > 0) {
+                const last = response.messages[response.messages.length - 1];
+                conversation.lastMessageAt = last.createdAt;
+                updateRoomPreview(roomId, last);
+            }
+            if (String(roomId) === activeRoomId) {
+                renderConversation(roomId, { markRead: true });
+            }
+        });
+    }
+
     function renderConversation(roomId, options = {}) {
         const markRead = options.markRead !== false;
         const room = roomsById.get(String(roomId));
@@ -145,6 +169,8 @@ $(function() {
         const $chatMessages = $('#chatMessages');
 
         if (!room) return;
+
+        ensureRoomHistory(String(roomId));
 
         activeRoomId = String(roomId);
         if (markRead) {

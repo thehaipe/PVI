@@ -1,6 +1,7 @@
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
+const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const {
   addRoomMember,
@@ -9,9 +10,13 @@ const {
   findRoom,
   removeRoomMember,
 } = require('./chat-server-logic');
+const Message = require('./models/message');
 
 const hostname = '127.0.0.1';
 const port = 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/pvi_chat';
+const HISTORY_LIMIT = 50;
+
 const usersPath = path.join(__dirname, 'data', 'chat-users.json');
 const users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
 const roomsPath = path.join(__dirname, 'data', 'chat-rooms.json');
@@ -21,6 +26,38 @@ function saveRooms() {
   fs.writeFileSync(roomsPath, `${JSON.stringify(rooms, null, 2)}\n`, 'utf8');
 }
 
+async function saveMessage(message) {
+  try {
+    await Message.create({
+      id:           message.id,
+      senderId:     message.senderId,
+      senderName:   message.senderName,
+      roomId:       message.roomId,
+      recipientIds: message.recipientIds,
+      allStudents:  message.allStudents,
+      text:         message.text,
+      read:         message.read,
+      createdAt:    message.createdAt,
+    });
+  } catch (err) {
+    console.error('Failed to save message:', err.message);
+  }
+}
+
+async function getHistory(roomId) {
+  const docs = await Message.find({ roomId })
+    .sort({ createdAt: 1 })
+    .limit(HISTORY_LIMIT)
+    .lean();
+
+  return docs.map(({ _id, __v, ...msg }) => msg);
+}
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => console.log(`MongoDB connected: ${MONGODB_URI}`))
+  .catch((err) => console.error('MongoDB connection error:', err.message));
+
 const server = http.createServer((req, res) => {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -28,9 +65,7 @@ const server = http.createServer((req, res) => {
 });
 
 const io = new Server(server, {
-  cors: {
-    origin: '*',
-  },
+  cors: { origin: '*' },
 });
 
 io.on('connection', (socket) => {
@@ -41,16 +76,32 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('sendMessage', (payload, response) => {
+  socket.on('getHistory', async ({ roomId }, response) => {
+    try {
+      const messages = await getHistory(roomId);
+      if (typeof response === 'function') {
+        response({ status: true, messages });
+      }
+    } catch (err) {
+      if (typeof response === 'function') {
+        response({ status: false, error: { message: err.message } });
+      }
+    }
+  });
+
+  socket.on('sendMessage', async (payload, response) => {
     try {
       const message = buildChatMessage(payload, users, rooms);
+
+      await saveMessage(message);
+
       const deliveryRooms = new Set([
         `user:${message.senderId}`,
-        ...message.recipientIds.map((recipientId) => `user:${recipientId}`),
+        ...message.recipientIds.map((id) => `user:${id}`),
       ]);
 
-      deliveryRooms.forEach((deliveryRoom) => {
-        io.to(deliveryRoom).emit('chatMessage', message);
+      deliveryRooms.forEach((room) => {
+        io.to(room).emit('chatMessage', message);
       });
 
       if (typeof response === 'function') {
@@ -58,10 +109,7 @@ io.on('connection', (socket) => {
       }
     } catch (error) {
       if (typeof response === 'function') {
-        response({
-          status: false,
-          error: { message: error.message },
-        });
+        response({ status: false, error: { message: error.message } });
       }
     }
   });

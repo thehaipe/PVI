@@ -5,6 +5,17 @@ function booleanToFormValue(value) {
     return value === true || value === 1 || value === '1' || value === 'true' ? '1' : '0';
 }
 
+function formatDisplayDate(value) {
+    const match = String(value || '').match(/^(\d{4})[-./](\d{2})[-./](\d{2})$/);
+
+    if (!match) {
+        return value || '';
+    }
+
+    const [, year, month, day] = match;
+    return `${day}.${month}.${year}`;
+}
+
 if ('serviceWorker' in navigator) {
     $(window).on('load', function() {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -310,7 +321,7 @@ class StudentManager {
                     <td>${CONFIG.groups[student.group] ?? student.group}</td>
                     <td>${student.firstName} ${student.lastName}</td>
                     <td>${CONFIG.genders[genderKey] ?? genderKey}</td>
-                    <td>${student.birthday}</td>
+                    <td>${formatDisplayDate(student.birthday)}</td>
                     <td><span class="status-indicator ${statusClass}"></span></td>
                     <td>
                         <button class="btn-edit" type="button" data-student-id="${studentId}">✎</button>
